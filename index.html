@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>掲示板巡回</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="掲示板巡回">
+<meta name="theme-color" content="#EAE2CF">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAB3klEQVR4nGN89eg8Ay0BE01NZ2BgYIGznCJrqWv0vuXNDHAfUN10uJksyEKntk6llulm3tkQBs3jYOhbwEJYCQzs8fJF5rps20w1C9CMRhYkaA3hIMJqOpGyhC1A1u+ybbO0u5vLts0QRKQd+IIIWSevktKrI0e/v3hxb+lyiIignu77S5fhKnGFFVGpyHL6VHF7WzEb6///////9xeCGP7/JyaecfoA7nyXbZu/PnzEwMDw788faXe3P9++yXh7wZW5bNsMUYnLE4RT0ac7d57t2v3x2g1WXt7ne/fxyMvfmDKNgYHh+8uX0h7uYtZWZPoADv79+i1sbMwhIvr+0mVGRiZOScl/f34rhIa82H+AlZeHoHbCcSCgpcklIcHAyKBTVsIhIS7r7ysfGPDm1Omf796x8vNTwQIGBob/DP8hDHEb6zvzF9xdtIRLWvrbkyccoqLkWwCPsT1evncXLeGSlGRgYBAxM1VLTZF0dX62a9fvT59ZuLiQ0wJWc4gqKl4fP6FfWw3n8sjLK8fHMTEzE8zG+HyA5ig0s5hYWPZ4+2FViQYI+ACezDHtIMZ0BmIiGb9+gpmZqDiAmELD+oAkE9HA0K+T6Vvpw1tLVARQH0DakdQFEDMZad18BwAifbYnhQBZwQAAAABJRU5ErkJggg==">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIuaOsuekuuadv+W3oeWbniIsICJzaG9ydF9uYW1lIjogIuaOsuekuuadv+W3oeWbniIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjRUFFMkNGIiwgInRoZW1lX2NvbG9yIjogIiNFQUUyQ0YiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFMUUFBQUMwQ0FJQUFBQ3lyNUZsQUFBTXFFbEVRVlI0bk8yZGVXd1UxeG5BMzh4ZVhxK3hqWGQ5QWNaQUNYYzViY0JBMGdhUnFvR1FSRlhTbGlaVlcxRVNxdlFTUW0zS0ZRaWtqZEpLYVNwb0dxRklSSkZLVzRsU2lVSmFRaEZKYTZ1eDhZRTVDaEVFRFBoYWJLOE50bmZYM3QzcEh3UGp6ZXkrOFJ5N085OGJmei81ajdlek0yL2V2dmViN3gwN3MrYjhOeHNKZ2lTRE43c0FDRnhRRG9RS3lvRlFRVGtRS2lnSFFnWGxRS2lnSEFnVmxBT2hnbklnVkZBT2hBcktnVkJCT1JBcUtBZEN4WjdDdkZadjJKbkMzQkRkbkQ2OE55WDVjTWEvc2tjbndHTFFFcVBkQ3BvQkdZT3Rvejl5Sko2NDl2Z0JJMFZCVXNYU2RTL0p0dWdMSVRybGtKbUJXZ0JFcG9nT1AvVElFVzhHYWdHY2VFVzArbUZveklGbXdNZElHMm1XUXdvYmFBWXJTQzJsZFh5cVRRNmNtN0NPcGhiVTJhMWcyR0FMZmUyRnkrY0lGUTF5NEdpRGFYU01QREJ5SUZSUURvUUt5b0ZRUVRrUUtpZ0hRZ1hsUUtpZ0hBZ1ZsQU9oZ25JZ1ZGQU9oQXJLZ1ZCQk9SQXFLQWRDQmVWQXFLQWNDQldVQTZHQ2NpQlVVdmtnTlZ1Y1dydGUvYzVyVGh4TFgwbkFNb2JrMEdTRDhyRmp4QlhyeTJIRWlWSHp0TFlsbHBVakhVNG9uTVdTbGxoUWpzeG9rZlNrRmxQRVVuS1lva1ZpQVN5amlFWGswS2VGeWxiVW1ybGxGR0Zlamd6TVNHVkhxVHlqQlJSaFd3NlY3WlRhRnBKeVUzUDJVMnZYcytzSHEzS29hWmgwdDRwS1M5Z05JVXd1bjQ5cXhwb1R4ekxaR0dwT1ovcGdXUWZzeWFGY3l4bldRdE9wbWZPRHBXNWxWQzB5VmhJRnhHTFFpc3BXRjhOTTVHRENEQWxyaEJBMjVGQ29UUlA3RVdXVUM4YUVId3pJb1d4R0prdWlBNmI5Z0M0SDAyYUlzT3NIYURsb2RRZTJLNkdoVUdESWZvQ1dJeWxzYVJFUGN5V0hLMGZTUzRxNStwV1J0UHhnZ3dkUU9ReWFFWXRFWXNQRDRsOUt5NVVDR1BJRDRpS1k4WnFxLzluTGZaZXZpT2xWaDk3Tktpb3lYS2kwQS9Bck9xQ1JJeEZvRldjRVZqNEx1TWlSNGFGRy9jdmJBczNuVTU3dHcrOGZjbm05Q2p1c09YRXM4Wk5DQ3g2d0lvY2xCNkUwNEE4K1lNbUJnQUpRdDJKdTJPQWRqaFVILzJBa2g2YmRlL3R2M05CMENQRE9CWkFjaVdTMGpqak80S1NHZHpoMEhKWFVEeUJBNlZiQVZwQXBBS2tOS0hJa0FpUzBaZ0N3bnhTRUhFQXVGRkJBcUJNUWNpUUM5bUpLRXpBL3Iva0RVZ2lYQ0NFa05qUUVwQ1FTcGs5YklFWU9tSmRSdWdINHFjMlBITHJwYVRyWHNHM0hxTHY5NTdzYlpWdW1mKzg3VTU1OUpqMkZzaFFteXdFbmt2TU94eU4vZk45SUR2VS8zM2J2czg5U1ZSNFJjM3NXY0pIRHRMcmdPTHZIWXlnRG04MWdFYUF0aUlHVFF6MDJsOHRUTmlucFc4Rk9mMnhvU0V5N1MwdDUrK2VhelRGdVhOb0xad25NbE1QZ1ZaSTNlMWJWTzI4bmZhdHV5MWJwWnA4bHY5ckh4TTArTkV6c1dXRE5WZ0NPMkRNTXFCcUFKUWNDQ29iSEhLa0Y0Q0tZNldEa1FLaVlKZ2RlcHVveHE2NEFkU3Vtak1YbS9PUkhrV0JJVEFjN09wcjMvVkpNY3p5L2FPOGVSMTZldm15ZGVnOGtrRlk3QU1saEN1N1NVaW5kY3VTdlVycGs5YU1GaXhhYVVDQkk0SmpqUHYzWGIzU2UrVWhNY3p3LzladGZON2M4RUVBNTduUDEwSHVDSUlqcGtpOS9LWHZDQkhQTEE0R3hKVWV3MDMvcjc4ZnZYcjBxMjk3VGRLNnI3cXlZNW5oKzZvWnZaTHhvRUxIK21FT0lSbnN2L2ErcnRyYnJrN3IrbGhaQ3lNek5MK1JPbnk3dEVCa1l1UFRtYjBmMmo4VnFObTFPMWRtWDdYOXIzTFJwcWNvdHcxaGZqdi8rOE1mUkIvTVJrV0JIWi96THl3ZCtIN3JUbGFhek0vMGxuOVhrR0xoMXU2dTJickN0WGRvaU00TVFFdXpva05JZFp6N3FPUE54K3NyanlFRTVUQ1VXaWZTZXY5QlZXM2ZuazlyNGhwZkRjYmt6SGlwYVVWVzBjcVc0WWJDdC9mS0JrZTkxOCtmT3laczEwM2g1YnAvNFFEU1M0M21iTzh0NGhtYkJzQnpCOXZhdStvYnVzL1dCNXZQUmtEdzhTSEE4bno5dmJ0R0txcUlWVlM2ZlQ5bysxTnZYdVBPVnlNQ0ErTkxsOHkzWXRTTWx2VURyUDA2S0NYdU9vYnVIVElkVk9ZS2QvdXFOTDZqWmM5bit0M0ttVEpGdGpBWkRUYnQyQjl2djl6NGN4ODNidWlVbFpnaUNFQmtjRk5OMlQ0N3hERTJFMWFtc3U3aklPWDU4NG5iZWJ2Y3RyWXovYlF4N2RyWnNIeUVTT2JmdnRmZ0pyU0FJRGR0M3RwMzhVUG1rZ2VibWdWdTNsZmVKOVBlVEIrc2xEbVAzSFpvT3E1R0RFSkkvWjdhL3VrWk04MDZuZC9HaW9sVXJDNWN0dFhzOGRWdTJocnU3a3g0VkRZWE92LzVHVDJPVGJMc1FqUktCY2laQjZHNW92UDdudi9SZXVPanllaXQrODRhN21IcHJXYVMvWDByYlBYSXYyUUtRSEZydmg4dWZPNmY3YkwyM3NxSjQxVXBmWmFXYW9WKzR1NmRwejZ2M3JsNlR0amp6ODRkNmU2bjc5L1MwLyt0MDZ3Zi9sTWE1NGU3dWhtMDdLbjc5dXF1Z0lPa2h3M0Z5T0hKelZYNldlSUI4NjBaTWxNUDRkNDhUSGxzejhmR3YybHd1bGZ2M1g3L1IrTXFlY05mSWtvWm5jdG1NVFJzYmQrNlc3Um02MCtXdnFmRlgxL1JkdkNTdHFVczQ4L09DYmUxVU9lN2VsZEtwV3VRdzY5NUJRSkZESzFxZkpQQlhWOGViNFM0cFh2emF2bkNnUjlvUzlQdGJqaHoxVjFmM1hmbVVKRGpCTzUyRnk1ZE5mdm9wNWVudVVGK2NISGw2SWdjY0dKWkRLOU9lZjg2Um0zdmxuWU5FRUR5VHl4YnRmZFhsTFlpWDQvcmhQeVVleFhIYytQbGZMRm45YU5IS0ZZbGoyMFNHKzFJZk9jeGlETWxCQ0NsN2NyMGdDSjBmLzN2aDdsM0tMZWZJeVNsWXN0aFhXZUdyV0tKcDZERFUxemVTaWE0eEJ4eGd5WkdCWnpRbVAvVmsyUlByYUUrbjVVeWQ0cXVzOUZWVzVNMmV4ZkY2NXZsRGdZQ1VkaVdiYkNzRFp6Ukt6SlhEclB2aGFHYk0vTUdMWmV1Zk1KaDV1R2RFRG1lQlpqa1NNZkZKRmxZWHdkS0J6YWxxNGpNVUNEVDhZcnYwUkoyTWNNL0krb3ByZlBJWkRTdUFrd05VWEUzS2NIOS96N25tdWkxYmF6WnRIcmg1Uy9adXVPdStISnpkN2hpbmJma2MybWMzV1E1UVQvK3BKT1MvSXlZR1cxc0ZJUmIvVm1Sd2NQamVQVEdkNWZNUmpqTjRMdnhsSHpQaCtKSHh4L0JBdjhLZUVvSHpGeDRjekxtTGl1UGZpcitOeUYzeXViZFlCTlpzUlNTVHo1WEhUMmhiamh5TkRROW4rWHk4M1o3MG9oZGlzY0cyOXB0SC95YSs5RXlhS0Z1ekgyeHRsZEx1WW0xeVFPdFRDQVE1ekgyR0o4dm56U3IwaWJjSkRnVUMxOTdUOE9NK2hWVlZzaTN4UDIvdG5sQktqR0Y2bnd1MFc4bWNMaHczWTlQM2RSem44dm5Ldi9hMGJPTzlheU0vK3pSdTZsVDF1UUVNR3dTSUhPWmVJa1dyVmk3WXViMXcrVEozY1JIdmRIS0tvMGliMjUxVFhqNXA3ZU5WYisrWExZQUtndEI3OFpMME1tZnFGQ09sTWoxc0VBamRDZzBqSTQvRXIxS1ZLYXhhWGxpMVhOKzVKQUxONTZXYkRyTUtDNVgvR1U4OE1NTUdBUkk1aUlFTEpSb095MVFJZHZvSFdtNUtMMjFaYmtNbFU0MDBVQ1dFRkN4Y1lDUXJDR0dEUUk0Y1JGM3dxUDNwbG9HV201ek54dGxzSE1mRm9sRWhFcEhlNVozT0ZON2wyM3ZoWXVEaVJWZUIxNW1YYTgvTzVyTmM0cnhtdU85dTI4a1B1MnJycEQyTEgzbFlaWjVnd3dZQkpZZSsvMHd6OFN1UGZYcndYU0VhRmFMUnhIY0xGaTdROS8xWlV0eWxKZlhiZHNUTGw1U2M4bkx2NGtWcU1nVCtiOHVnZEN1NlNaeFBTbVJQbkRoejg0c3BQSmZMNnkxWU1FcC9ZZmQ0NW03ZFlueHRGQUtBSWdmUkZUemNKY1c1MDZlSEF6MGN6L05PbDgyZDVjelB6NTQ0b1dEK2ZHL0ZFbjMvUFVtQnZKa1BkZGZYSjMzTG1aZVhQMi91Rjc3OXZHZHltWnFzZ0ljTkFrME9vc3VQcGI5N004MkZHbUhhYzk4cWYvYVphQ2dVRFlWam9WQXNFaUdDUUhqZW1Uc3Uvb21wVVlGdkJnRW9CdzNULzcvRWZUak81bkxaWEM2aS8zZWRRQTlDNDRFNDVnQWhRY1lCK0traHlrRlkrSWU4dW1HaVF4RUJLZ2V4cUI4TW1VRWd5MEdEWFQrWUt6bG9PV2lYMUttMTY5bXFhSVVDZ3cwYkJMZ2NSTEh1V1BGRG9aeVF6U0R3NVNDTSs4R3VHWVFKT2Nob2ZzQlVSTGxnOE0wZ3JNaEJScXROYUg0b2w0Y0pNd2hESzZUa1FaM1M2bDNjYm5xOVcwTUxFV1lpaDhTb0ljU3NLRExxcWRreWc3QW9CMUZSeXhsV1JNM3BtRE9Ec05XdHhLUGN4WWhJNzZhcFlWVDZ4NklXSXF6S0lhTHltWmZVV3FJcEpyRnJCbUZkRHFJdWhFaklkbFBaY3ZwNktLYTFFR0ZlRGhGTmlraWthVnhpQVMxRUxDS0hpRDVGVWw0QXkyQXBPVVJNVWNSaVdvaFlVQTRScWJYU2Fva2xuWkN3ckJ3UzZiREUyazVJV0Y4T0NWbUxqcDBacVc3R2tCd3l4bVo3YTRMSjVYTWtNNkFjQ0JXVUE2R0NjaUJVVUE2RUNzcUJVRUU1RUNvb0IwSUY1VUNvb0J3SUZaUURvYUpCanRPSDk0cUpwZXRlU2s5aGtEUWl0WnJVanFPQ2tRT2hvbE1PREI1c29hKzl0TW1oUGlJaE1OSFVncG9qQjQ0OG1FUEhhRVBFMEpnRC9ZQ1BrVGJpL0RjYmRSeTJlc1BPK0plMXh3L29MZ0dTSm1SYTZCZ1M2SlNESlBoQlVCRXdKRVlMZllORi9YS0lKQ3FDZ01MSUhNTG9PZ2ZPWHlCanNIV01SbzU0TUlvQUlWVlhiQ3JsUUN3R0xwOGpWRkFPaEFyS2dWQkJPUkFxS0FkQ0JlVkFxS0FjQ0JXVUE2R0NjaUJVVUE2RUNzcUJVRUU1RUNyL0I1ck9rUlBwQkROdEFBQUFBRWxGVGtTdVFtQ0MiLCAic2l6ZXMiOiAiMTgweDE4MCIsICJ0eXBlIjogImltYWdlL3BuZyJ9LCB7InNyYyI6ICJkYXRhOmltYWdlL3BuZztiYXNlNjQsaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUNBQUFBQWdDQUlBQUFEOEdPMmpBQUFCM2tsRVFWUjRuR044OWVnOEF5MEJFMDFOWjJCZ1lJR3puQ0pycVd2MHZ1WE5ESEFmVU4xMHVKa3N5RUtudGs2bGx1bG0zdGtRQnMzallPaGJ3RUpZQ1F6czhmSkY1cnBzMjB3MUM5Q01SaFlrYUEzaElNSnFPcEd5aEMxQTF1K3liYk8wdTV2THRzMFFSS1FkK0lJSVdTZXZrdEtySTBlL3YzaHhiK2x5aUlpZ251NzdTNWZoS25HRkZWR3B5SEw2VkhGN1d6RWI2Ly8vLy8vLzl4ZUNHUDcvSnlhZWNmb0E3bnlYYlp1L1BuekV3TUR3Nzg4ZmFYZTNQOSsreVhoN3daVzViTnNNVVluTEU0UlQwYWM3ZDU3dDJ2M3gyZzFXWHQ3bmUvZnh5TXZmbURLTmdZSGgrOHVYMGg3dVl0WldaUG9BRHY3OStpMXNiTXdoSXZyKzBtVkdSaVpPU2NsL2YzNHJoSWE4MkgrQWxaZUhvSGJDY1NDZ3Bja2xJY0hBeUtCVFZzSWhJUzdyN3lzZkdQRG0xT21mNzk2eDh2TlR3UUlHQm9iL0RQOGhESEViNnp2ekY5eGR0SVJMV3ZyYmt5Y2NvcUxrV3dDUHNUMWV2bmNYTGVHU2xHUmdZQkF4TTFWTFRaRjBkWDYyYTlmdlQ1OVp1TGlRMHdKV2M0Z3FLbDRmUDZGZld3M244c2pMSzhmSE1URXpFOHpHK0h5QTVpZzBzNWhZV1BaNCsyRlZpUVlJK0FDZXpESHRJTVowQm1JaUdiOStncG1acURpQW1FTEQrb0FrRTlIQTBLK1Q2VnZwdzF0TFZBUlFIMERha2RRRkVETVphZDE4QndBaWZiWW5oUUJad1FBQUFBQkpSVTVFcmtKZ2dnPT0iLCAic2l6ZXMiOiAiMzJ4MzIiLCAidHlwZSI6ICJpbWFnZS9wbmcifV19">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Shippori+Mincho:wght@600;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EAE2CF;
+    --paper-card: #F6F0E1;
+    --ink: #2C3B4C;
+    --ink-soft: #5B6B7A;
+    --hanko: #B23A2E;
+    --soy: #A97C36;
+    --line: #C9BEA0;
+    --done-bg: #DDD3B8;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--paper);
+    background-image: radial-gradient(circle at 1px 1px, rgba(44,59,76,0.05) 1px, transparent 1.4px);
+    background-size: 14px 14px;
+    color: var(--ink);
+    font-family: 'Zen Maru Gothic', sans-serif;
+    min-height: 100vh;
+    padding: 18px 14px 80px;
+  }
+  .wrap{ max-width: 480px; margin: 0 auto; }
+
+  /* ---- header ticket ---- */
+  .ticket{
+    background: var(--paper-card);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 16px 18px 14px;
+    position: relative;
+    box-shadow: 3px 3px 0 rgba(44,59,76,0.15);
+    margin-bottom: 16px;
+  }
+  .ticket::after{
+    content:"";
+    position:absolute; left:-8px; right:-8px; bottom:-10px; height:10px;
+    background-image: radial-gradient(circle at 6px 0, transparent 6px, var(--paper) 6.5px);
+    background-size: 12px 10px;
+    background-repeat: repeat-x;
+  }
+  .ticket-title{
+    font-family:'Shippori Mincho', serif;
+    font-weight:800;
+    font-size:22px;
+    letter-spacing:0.06em;
+    display:flex; align-items:baseline; justify-content:space-between;
+  }
+  .ticket-title small{ font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft); font-weight:400; }
+  .progress-row{ display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .progress-bar{ flex:1; height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .progress-fill{ height:100%; background:var(--hanko); transition: width .3s ease; }
+  .progress-count{ font-family:'DotGothic16',sans-serif; font-size:14px; white-space:nowrap; color:var(--ink-soft); }
+
+  /* ---- current target card ---- */
+  .current-card{
+    background: var(--paper-card);
+    border: 2px solid var(--hanko);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 3px 3px 0 rgba(178,58,46,0.18);
+    position:relative;
+  }
+  .current-label{
+    font-family:'DotGothic16',sans-serif;
+    font-size:12px; color:var(--hanko); letter-spacing:0.1em;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .mode-toggle{ display:flex; gap:6px; }
+  .mode-btn{
+    border:1px solid var(--line); background:var(--paper); color:var(--ink-soft);
+    font-family:'DotGothic16',sans-serif; font-size:10px; padding:3px 7px; border-radius:12px; cursor:pointer;
+  }
+  .mode-btn.active{ background:var(--ink); color:var(--paper-card); border-color:var(--ink); }
+  .current-main{ display:flex; align-items:center; gap:14px; margin:12px 0 16px; }
+  .current-num{
+    width:56px; height:56px; border-radius:50%;
+    background:var(--ink); color:var(--paper-card);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Shippori Mincho',serif; font-weight:800; font-size:24px;
+    flex-shrink:0;
+  }
+  .current-name{ font-family:'Shippori Mincho',serif; font-weight:800; font-size:26px; }
+  .current-sub{ font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .btn-row{ display:flex; gap:10px; }
+  .btn{
+    flex:1; text-align:center; padding:14px 10px; border-radius:6px;
+    font-family:'Zen Maru Gothic',sans-serif; font-weight:700; font-size:15px;
+    border:2px solid var(--ink); cursor:pointer; text-decoration:none; display:block;
+  }
+  .btn-nav{ background:var(--ink); color:var(--paper-card); }
+  .btn-done{ background:var(--hanko); color:#fff; border-color:var(--hanko); }
+  .btn:active{ transform: translateY(1px); }
+
+  .all-done{
+    text-align:center; padding:30px 16px;
+  }
+  .all-done .stamp{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:90px; height:90px; border-radius:50%;
+    border:4px solid var(--hanko); color:var(--hanko);
+    font-family:'Shippori Mincho',serif; font-weight:800; font-size:15px;
+    transform: rotate(-8deg);
+    margin-bottom:12px;
+  }
+  .all-done p{ font-family:'DotGothic16',sans-serif; color:var(--ink-soft); font-size:13px; }
+
+  /* ---- list ---- */
+  .list-heading{
+    font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft);
+    letter-spacing:0.1em; margin: 4px 4px 8px;
+  }
+  .list{ display:flex; flex-direction:column; gap:8px; }
+  .item{
+    display:flex; align-items:center; gap:12px;
+    background: var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:10px 12px;
+    cursor:pointer;
+  }
+  .item.done{ background: var(--done-bg); border-color:var(--soy); opacity:0.85; }
+  .item.current{ border:2px solid var(--hanko); }
+  .item-num{
+    width:32px; height:32px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-family:'Shippori Mincho',serif; font-weight:800; font-size:14px;
+    background: var(--paper); border:1.5px solid var(--ink); color:var(--ink);
+  }
+  .item.done .item-num{ background:var(--soy); border-color:var(--soy); color:#fff; }
+  .item.current .item-num{ background:var(--hanko); border-color:var(--hanko); color:#fff; }
+  .item-body{ flex:1; min-width:0; }
+  .item-name{ font-family:'Shippori Mincho',serif; font-weight:700; font-size:16px; }
+  .item-status{ font-family:'DotGothic16',sans-serif; font-size:11px; color:var(--ink-soft); }
+  .item.current .item-status{ color:var(--hanko); }
+  .item-time{
+    font-family:'DotGothic16',sans-serif; font-size:13px; font-weight:700;
+    color:var(--soy); flex-shrink:0; text-align:right; white-space:nowrap;
+  }
+  .item-time.predicted{
+    font-weight:400; font-style:italic; color:var(--ink-soft);
+  }
+
+  /* ---- history ---- */
+  .history-heading{
+    font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft);
+    letter-spacing:0.1em; margin: 22px 4px 8px;
+  }
+  .history-list{ display:flex; flex-direction:column; gap:8px; }
+  .history-item{
+    background: var(--paper-card); border:1px solid var(--line); border-radius:6px;
+    padding:10px 12px; display:flex; justify-content:space-between; align-items:baseline;
+    font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft);
+  }
+  .history-item .h-date{ font-size:13px; color:var(--ink); font-weight:700; }
+  .history-empty{
+    text-align:center; font-family:'DotGothic16',sans-serif; font-size:12px;
+    color:var(--ink-soft); padding:12px;
+  }
+
+  .footer-row{ display:flex; justify-content:center; margin-top:22px; }
+  .reset-link{
+    font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft);
+    text-decoration:underline; background:none; border:none; cursor:pointer; padding:8px;
+  }
+
+  .sync-note{
+    text-align:center; font-family:'DotGothic16',sans-serif; font-size:11px;
+    color:var(--ink-soft); margin-top:6px;
+  }
+
+  /* ---- modal ---- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(44,59,76,0.45);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:var(--paper-card); border:2px solid var(--ink); border-radius:6px;
+    padding:20px; max-width:340px; width:100%;
+    box-shadow:3px 3px 0 rgba(44,59,76,0.2);
+  }
+  .modal-box p{ font-size:14px; line-height:1.6; margin:0 0 16px; }
+  .modal-btns{ display:flex; gap:10px; }
+  .modal-btns .btn{ font-size:14px; padding:10px; }
+  .btn-cancel{ background:var(--paper); color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="ticket">
+    <div class="ticket-title">掲示板巡回<small>KEIJIBAN PATROL</small></div>
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-count" id="progressCount">0 / 23 完了</div>
+    </div>
+    <div class="progress-row" id="elapsedRow">
+      <div class="progress-count" id="elapsedLabel">巡回開始前</div>
+    </div>
+    <div class="sync-note" id="syncNote">この端末に保存されます</div>
+  </div>
+
+  <div id="currentArea"></div>
+
+  <div class="list-heading">巡回順一覧</div>
+  <div class="list" id="list"></div>
+
+  <div class="history-heading">巡回実施履歴</div>
+  <div class="history-list" id="historyList"></div>
+
+  <div class="footer-row">
+    <button class="reset-link" id="resetBtn">この巡回をリセットする</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <p>すべての完了状況をリセットします。よろしいですか？</p>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" id="modalCancel">キャンセル</button>
+      <button class="btn btn-done" id="modalConfirm">リセットする</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'keijiban_patrol_progress';
+  const TIMES_KEY = 'keijiban_patrol_times';
+  const START_KEY = 'keijiban_patrol_start';
+  const HISTORY_KEY = 'keijiban_patrol_history';
+
+  const STOPS = [{"id": "13", "lat": 35.5289068, "lng": 139.4698987}, {"id": "14", "lat": 35.5282835, "lng": 139.4700986}, {"id": "15", "lat": 35.5281743, "lng": 139.470763}, {"id": "17", "lat": 35.5284414, "lng": 139.4712588}, {"id": "18", "lat": 35.5275164, "lng": 139.4719638}, {"id": "16", "lat": 35.5273216, "lng": 139.4733134}, {"id": "19", "lat": 35.5263711, "lng": 139.4730679}, {"id": "21", "lat": 35.5251718, "lng": 139.4724745}, {"id": "22", "lat": 35.5242648, "lng": 139.4718649}, {"id": "24", "lat": 35.5233862, "lng": 139.4730535}, {"id": "23", "lat": 35.5242768, "lng": 139.4729069}, {"id": "20", "lat": 35.5253363, "lng": 139.4736342}, {"id": "5", "lat": 35.5265158, "lng": 139.4759385}, {"id": "6", "lat": 35.52812, "lng": 139.4755059}, {"id": "4", "lat": 35.5290014, "lng": 139.4769695}, {"id": "7", "lat": 35.5297393, "lng": 139.4751677}, {"id": "8", "lat": 35.5302105, "lng": 139.4732936}, {"id": "9", "lat": 35.5295154, "lng": 139.4720616}, {"id": "10", "lat": 35.5300963, "lng": 139.4717806}, {"id": "12", "lat": 35.5307526, "lng": 139.4704875}, {"id": "11", "lat": 35.5310254, "lng": 139.4707986}, {"id": "2", "lat": 35.5308126, "lng": 139.4768376}, {"id": "1", "lat": 35.531497, "lng": 139.4768233}];
+
+  // ---- 移動時間予測（直線距離を実際の道なりに近づけて補正） ----
+  // Googleマップの実際の経路時間（道なり）はAPIキーが必要なため、
+  // ここでは「直線距離 × 遠回り係数」で道なり距離を近似し、
+  // 移動手段ごとの実勢速度に加え、掲示板の確認等にかかる立ち寄り時間も加算する。
+  const SPEED_KMH = { bike: 10, walk: 4, car: 15 };       // 住宅街の巡回を想定した現実的な速度
+  const ROUTE_FACTOR = { bike: 1.3, walk: 1.4, car: 1.25 }; // 直線距離に対する道なり距離の割増係数
+  const STOP_DWELL_MINUTES = 2; // 各地点で掲示板を確認する立ち寄り時間
+
+  function haversineMeters(lat1, lng1, lat2, lng2){
+    const R = 6371000;
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+
+  // legDistances[i] = 直前の地点(i-1)から地点iまでの直線距離(m)。先頭(i=0)は出発地点が不明なため0とする。
+  const legDistances = STOPS.map((s, i) => i === 0 ? 0 : haversineMeters(STOPS[i-1].lat, STOPS[i-1].lng, s.lat, s.lng));
+
+  let completedCount = 0; // 0〜STOPS.length
+  let completedTimes = new Array(STOPS.length).fill(null); // 各地点の到着完了時刻(ms)
+  let patrolStart = null; // 巡回開始時刻(ms)
+  let patrolHistory = []; // 過去の巡回実施記録
+
+
+  function loadProgress(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const n = raw !== null ? Number(raw) : 0;
+      completedCount = (Number.isFinite(n) && n >= 0) ? n : 0;
+
+      const rawTimes = localStorage.getItem(TIMES_KEY);
+      const parsedTimes = rawTimes ? JSON.parse(rawTimes) : null;
+      completedTimes = (Array.isArray(parsedTimes) && parsedTimes.length === STOPS.length)
+        ? parsedTimes : new Array(STOPS.length).fill(null);
+
+      const rawStart = localStorage.getItem(START_KEY);
+      patrolStart = rawStart ? Number(rawStart) : null;
+
+      const rawHistory = localStorage.getItem(HISTORY_KEY);
+      const parsedHistory = rawHistory ? JSON.parse(rawHistory) : null;
+      patrolHistory = Array.isArray(parsedHistory) ? parsedHistory : [];
+    }catch(e){
+      completedCount = 0;
+      completedTimes = new Array(STOPS.length).fill(null);
+      patrolStart = null;
+      patrolHistory = [];
+      document.getElementById('syncNote').textContent = 'この端末には保存できません（ブラウザの設定をご確認ください）';
+    }
+    render();
+  }
+
+  function persist(){
+    try{
+      localStorage.setItem(STORAGE_KEY, String(completedCount));
+      localStorage.setItem(TIMES_KEY, JSON.stringify(completedTimes));
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(patrolHistory));
+      if(patrolStart){
+        localStorage.setItem(START_KEY, String(patrolStart));
+      }else{
+        localStorage.removeItem(START_KEY);
+      }
+    }catch(e){
+      document.getElementById('syncNote').textContent = 'この端末には保存できません（ブラウザの設定をご確認ください）';
+    }
+  }
+
+  function markPatrolStarted(){
+    if(patrolStart === null){
+      patrolStart = Date.now();
+      persist();
+    }
+  }
+
+  function completeCurrentStop(){
+    const now = Date.now();
+    if(patrolStart === null){
+      // ナビ未タップのまま完了した場合の保険として、ここでも記録する
+      patrolStart = now;
+    }
+    completedTimes[completedCount] = now;
+    completedCount = completedCount + 1;
+
+    if(completedCount >= STOPS.length){
+      patrolHistory.unshift({
+        date: new Date(patrolStart).toISOString().slice(0,10),
+        mode: navMode,
+        start: patrolStart,
+        end: now,
+        duration: now - patrolStart
+      });
+      if(patrolHistory.length > 30) patrolHistory = patrolHistory.slice(0, 30);
+    }
+
+    persist();
+    render();
+  }
+
+  function resetProgress(){
+    completedCount = 0;
+    completedTimes = new Array(STOPS.length).fill(null);
+    patrolStart = null;
+    persist();
+    render();
+  }
+
+  function mapsUrl(stop, mode){
+    const travelmode = mode === 'walk' ? 'walking' : (mode === 'car' ? 'driving' : 'bicycling');
+    return `https://www.google.com/maps/dir/?api=1&destination=${stop.lat},${stop.lng}&travelmode=${travelmode}`;
+  }
+
+  function formatClock(ts){
+    const d = new Date(ts);
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    return `${hh}:${mm}`;
+  }
+
+  function formatElapsed(ms){
+    if(ms < 0) ms = 0;
+    const totalSec = Math.floor(ms/1000);
+    const h = Math.floor(totalSec/3600);
+    const m = Math.floor((totalSec%3600)/60);
+    const s = totalSec%60;
+    const mm = String(m).padStart(2,'0');
+    const ss = String(s).padStart(2,'0');
+    return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+  }
+
+  function updateElapsedDisplay(){
+    const label = document.getElementById('elapsedLabel');
+    if(!label) return;
+    if(patrolStart === null){
+      label.textContent = '巡回開始前';
+      return;
+    }
+    if(completedCount >= STOPS.length){
+      const lastTime = completedTimes[STOPS.length - 1] || patrolStart;
+      label.textContent = `開始 ${formatClock(patrolStart)} ／ 完了 ${formatClock(lastTime)}（所要 ${formatElapsed(lastTime - patrolStart)}）`;
+    } else {
+      label.textContent = `開始 ${formatClock(patrolStart)} ／ 経過 ${formatElapsed(Date.now() - patrolStart)}`;
+    }
+  }
+
+  function modeLabel(mode){
+    if(mode === 'walk') return '徒歩';
+    if(mode === 'car') return '車';
+    return '自転車';
+  }
+
+  let navMode = 'bike';
+
+  // 各地点の完了予測時刻(ms)を計算。まだ巡回を開始していない場合は全てnull。
+  // 実測データが2地点分以上たまった時点で、それ以降の予測は実際のペース
+  // （移動＋立ち寄り時間を合算した実測ペース）に基づいて補正する。
+  function computePredictedTimes(){
+    const total = STOPS.length;
+    const preds = new Array(total).fill(null);
+    if(patrolStart === null) return preds;
+
+    const routeFactor = ROUTE_FACTOR[navMode] || ROUTE_FACTOR.bike;
+    const defaultSpeedMPerMs = (SPEED_KMH[navMode] || SPEED_KMH.bike) * 1000 / 3600000;
+    const dwellMs = STOP_DWELL_MINUTES * 60000;
+
+    let useActualPace = false;
+    let actualSpeedMPerMs = null;
+    if(completedCount >= 2){
+      const elapsed = completedTimes[completedCount-1] - completedTimes[0];
+      let dist = 0;
+      for(let k = 1; k < completedCount; k++) dist += legDistances[k] * routeFactor;
+      if(elapsed > 0 && dist > 0){
+        // 実測ペースには移動時間と立ち寄り時間の両方が含まれるため、そのまま将来の区間に適用する
+        actualSpeedMPerMs = dist / elapsed;
+        useActualPace = true;
+      }
+    }
+
+    let cumTime = patrolStart;
+    for(let i = 0; i < total; i++){
+      if(i < completedCount){
+        cumTime = completedTimes[i];
+        preds[i] = cumTime;
+      } else {
+        let legTime;
+        if(i === 0){
+          legTime = dwellMs; // 出発地からの道なり距離は不明なため、確認の立ち寄り時間のみ加算
+        } else {
+          const distAdjusted = legDistances[i] * routeFactor;
+          legTime = useActualPace
+            ? (distAdjusted / actualSpeedMPerMs)
+            : (distAdjusted / defaultSpeedMPerMs + dwellMs);
+        }
+        cumTime = cumTime + legTime;
+        preds[i] = cumTime;
+      }
+    }
+    return preds;
+  }
+
+  function render(){
+    const total = STOPS.length;
+    document.getElementById('progressFill').style.width = (completedCount/total*100) + '%';
+    document.getElementById('progressCount').textContent = `${completedCount} / ${total} 完了`;
+    updateElapsedDisplay();
+
+    const currentArea = document.getElementById('currentArea');
+    if(completedCount >= total){
+      currentArea.innerHTML = `
+        <div class="current-card">
+          <div class="all-done">
+            <div class="stamp">巡回<br>完了</div>
+            <p>本日の掲示板巡回はすべて完了しました</p>
+          </div>
+        </div>`;
+    } else {
+      const stop = STOPS[completedCount];
+      currentArea.innerHTML = `
+        <div class="current-card">
+          <div class="current-label">
+            <span>次の目的地</span>
+            <span class="mode-toggle">
+              <button class="mode-btn ${navMode==='bike'?'active':''}" data-mode="bike">自転車</button>
+              <button class="mode-btn ${navMode==='walk'?'active':''}" data-mode="walk">徒歩</button>
+              <button class="mode-btn ${navMode==='car'?'active':''}" data-mode="car">車</button>
+            </span>
+          </div>
+          <div class="current-main">
+            <div class="current-num">${completedCount+1}</div>
+            <div>
+              <div class="current-name">掲示板 No.${stop.id}</div>
+              <div class="current-sub">全${total}箇所中 ${completedCount+1}番目</div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <a class="btn btn-nav" href="${mapsUrl(stop, navMode)}" target="_blank" rel="noopener">Googleマップでナビ</a>
+            <button class="btn btn-done" id="nextBtn">到着・完了</button>
+          </div>
+        </div>`;
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        completeCurrentStop();
+      });
+      currentArea.querySelector('.btn-nav').addEventListener('click', () => {
+        markPatrolStarted();
+        updateElapsedDisplay();
+      });
+      currentArea.querySelectorAll('.mode-btn').forEach(b => {
+        b.addEventListener('click', () => { navMode = b.dataset.mode; render(); });
+      });
+    }
+
+    const predictedTimes = computePredictedTimes();
+    const listEl = document.getElementById('list');
+    listEl.innerHTML = STOPS.map((stop, idx) => {
+      const orderNum = idx + 1;
+      const isDone = idx < completedCount;
+      const isCurrent = idx === completedCount;
+      const statusText = isCurrent ? '巡回中' : (isDone ? '' : '未訪問');
+      let timeText = '';
+      let timeClass = 'item-time';
+      if(isDone && completedTimes[idx]){
+        timeText = `完了 ${formatClock(completedTimes[idx])}`;
+      } else if(predictedTimes[idx] !== null){
+        timeText = `予測 ${formatClock(predictedTimes[idx])}`;
+        timeClass += ' predicted';
+      }
+      return `
+        <div class="item ${isDone?'done':''} ${isCurrent?'current':''}" data-idx="${idx}">
+          <div class="item-num">${orderNum}</div>
+          <div class="item-body">
+            <div class="item-name">掲示板 No.${stop.id}</div>
+            ${statusText ? `<div class="item-status">${statusText}</div>` : ''}
+          </div>
+          ${timeText ? `<div class="${timeClass}">${timeText}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('.item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = Number(el.dataset.idx);
+        const stop = STOPS[idx];
+        markPatrolStarted();
+        updateElapsedDisplay();
+        window.open(mapsUrl(stop, navMode), '_blank');
+      });
+    });
+
+    const historyEl = document.getElementById('historyList');
+    if(patrolHistory.length === 0){
+      historyEl.innerHTML = '<div class="history-empty">まだ実施記録がありません</div>';
+    } else {
+      historyEl.innerHTML = patrolHistory.map(rec => {
+        return `
+          <div class="history-item">
+            <span class="h-date">${rec.date}（${modeLabel(rec.mode)}）</span>
+            <span>${formatClock(rec.start)}〜${formatClock(rec.end)}　所要 ${formatElapsed(rec.duration)}</span>
+          </div>`;
+      }).join('');
+    }
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.add('show');
+  });
+  document.getElementById('modalCancel').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.remove('show');
+  });
+  document.getElementById('modalConfirm').addEventListener('click', () => {
+    resetProgress();
+    document.getElementById('modalOverlay').classList.remove('show');
+  });
+
+  loadProgress();
+  setInterval(() => {
+    if(patrolStart !== null && completedCount < STOPS.length){
+      updateElapsedDisplay();
+    }
+  }, 1000);
+</script>
+</body>
+</html>
