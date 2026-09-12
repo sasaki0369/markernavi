@@ -110,6 +110,18 @@
   .btn-done{ background:var(--hanko); color:#fff; border-color:var(--hanko); }
   .btn:active{ transform: translateY(1px); }
 
+  .gps-row{
+    display:flex; align-items:center; gap:8px; margin:10px 0 2px;
+    font-family:'DotGothic16',sans-serif; font-size:11px; color:var(--ink-soft);
+  }
+  .gps-status{ flex:1; }
+  .arrival-banner{
+    background: var(--hanko); color:#fff; text-align:center; padding:9px; border-radius:6px;
+    font-family:'Zen Maru Gothic',sans-serif; font-weight:700; font-size:14px; margin:10px 0;
+    animation: gpsPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes gpsPulse{ 0%,100%{ opacity:1; } 50%{ opacity:0.55; } }
+
   .all-done{
     text-align:center; padding:30px 16px;
   }
@@ -601,6 +613,73 @@
 
   let navMode = 'bike';
 
+  // ---- GPSによる接近通知（自動完了はせず、近づいたことを表示するのみ） ----
+  const GPS_ENABLED_KEY = 'keijiban_patrol_gps_enabled';
+  const ARRIVAL_THRESHOLD_METERS = 30; // この距離以内に入ったら「付近です」と表示
+
+  let gpsEnabled = false;
+  let gpsWatchId = null;
+  let lastKnownPosition = null; // {lat,lng}
+  let gpsErrorMessage = '';
+  let lastNotifiedIndex = -1; // 直近でバイブ通知を出した地点のインデックス（同じ地点で連発しないため）
+
+  function loadGpsPref(){
+    try{
+      gpsEnabled = localStorage.getItem(GPS_ENABLED_KEY) === '1';
+    }catch(e){
+      gpsEnabled = false;
+    }
+  }
+
+  function startGpsWatch(){
+    if(!('geolocation' in navigator)){
+      gpsErrorMessage = 'この端末は位置情報に対応していません';
+      gpsEnabled = false;
+      try{ localStorage.setItem(GPS_ENABLED_KEY, '0'); }catch(e){}
+      render();
+      return;
+    }
+    gpsErrorMessage = '';
+    gpsWatchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        lastKnownPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        gpsErrorMessage = '';
+        render();
+      },
+      (err) => {
+        gpsErrorMessage = '位置情報を取得できません（ブラウザの位置情報の許可をご確認ください）';
+        render();
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+    );
+  }
+
+  function stopGpsWatch(){
+    if(gpsWatchId !== null && 'geolocation' in navigator){
+      navigator.geolocation.clearWatch(gpsWatchId);
+    }
+    gpsWatchId = null;
+    lastKnownPosition = null;
+    gpsErrorMessage = '';
+    lastNotifiedIndex = -1;
+  }
+
+  function toggleGps(){
+    gpsEnabled = !gpsEnabled;
+    try{ localStorage.setItem(GPS_ENABLED_KEY, gpsEnabled ? '1' : '0'); }catch(e){}
+    if(gpsEnabled){
+      startGpsWatch();
+    } else {
+      stopGpsWatch();
+    }
+    render();
+  }
+
+  function formatDistance(m){
+    if(m < 1000) return `約${Math.round(m/5)*5}m`;
+    return `約${(m/1000).toFixed(1)}km`;
+  }
+
   // 各地点の完了予測時刻(ms)を計算。まだ巡回を開始していない場合は全てnull。
   // 実測データが2地点分以上たまった時点で、それ以降の予測は実際のペース
   // （移動＋立ち寄り時間を合算した実測ペース）に基づいて補正する。
@@ -672,6 +751,24 @@
         </div>`;
     } else {
       const stop = STOPS[completedCount];
+      let distText = '';
+      let showArrivalBanner = false;
+      if(gpsEnabled && lastKnownPosition){
+        const distM = haversineMeters(lastKnownPosition.lat, lastKnownPosition.lng, stop.lat, stop.lng);
+        distText = `現在地から目的地まで ${formatDistance(distM)}`;
+        if(distM <= ARRIVAL_THRESHOLD_METERS){
+          showArrivalBanner = true;
+          if(lastNotifiedIndex !== completedCount){
+            lastNotifiedIndex = completedCount;
+            if('vibrate' in navigator) navigator.vibrate([200,100,200]);
+          }
+        }
+      } else if(gpsEnabled && gpsErrorMessage){
+        distText = gpsErrorMessage;
+      } else if(gpsEnabled){
+        distText = '位置情報を取得中…';
+      }
+
       currentArea.innerHTML = `
         <div class="current-card">
           <div class="current-label">
@@ -689,6 +786,11 @@
               <div class="current-sub">全${total}箇所中 ${completedCount+1}番目</div>
             </div>
           </div>
+          <div class="gps-row">
+            <button class="mode-btn ${gpsEnabled?'active':''}" id="gpsToggleBtn">${gpsEnabled ? 'GPS通知:ON' : 'GPS通知:OFF'}</button>
+            <span class="gps-status">${distText}</span>
+          </div>
+          ${showArrivalBanner ? '<div class="arrival-banner">📍 目的地の付近です</div>' : ''}
           <div class="btn-row">
             <a class="btn btn-nav" href="${mapsUrl(stop, navMode)}" target="_blank" rel="noopener">Googleマップでナビ</a>
             <button class="btn btn-done" id="nextBtn">到着・完了</button>
@@ -701,9 +803,10 @@
         markPatrolStarted();
         updateElapsedDisplay();
       });
-      currentArea.querySelectorAll('.mode-btn').forEach(b => {
+      currentArea.querySelectorAll('.mode-btn[data-mode]').forEach(b => {
         b.addEventListener('click', () => { navMode = b.dataset.mode; render(); });
       });
+      document.getElementById('gpsToggleBtn').addEventListener('click', toggleGps);
     }
 
     const predictedTimes = computePredictedTimes();
@@ -894,7 +997,9 @@
     }
   });
 
+  loadGpsPref();
   loadProgress();
+  if(gpsEnabled) startGpsWatch();
   setInterval(() => {
     if(patrolStart !== null && completedCount < STOPS.length){
       updateElapsedDisplay();
