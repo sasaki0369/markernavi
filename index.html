@@ -188,7 +188,7 @@
     color:var(--ink-soft); padding:12px;
   }
 
-  .footer-row{ display:flex; justify-content:center; margin-top:22px; }
+  .footer-row{ display:flex; justify-content:center; gap:18px; margin-top:22px; flex-wrap:wrap; }
   .reset-link{
     font-family:'DotGothic16',sans-serif; font-size:12px; color:var(--ink-soft);
     text-decoration:underline; background:none; border:none; cursor:pointer; padding:8px;
@@ -281,13 +281,14 @@
   <div class="history-list" id="historyList"></div>
 
   <div class="footer-row">
-    <button class="reset-link" id="resetBtn">この巡回をリセットする</button>
+    <button class="reset-link" id="saveHistoryBtn">ここまでの進捗を履歴に保存する</button>
+    <button class="reset-link" id="resetBtn">保存せずにリセットする</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
-    <p>すべての完了状況をリセットします。よろしいですか？</p>
+    <p>ここまでの進捗を保存せずにリセットします。よろしいですか？</p>
     <div class="modal-btns">
       <button class="btn btn-cancel" id="modalCancel">キャンセル</button>
       <button class="btn btn-done" id="modalConfirm">リセットする</button>
@@ -522,6 +523,27 @@
     }
   }
 
+  function saveCurrentAsHistory(){
+    if(completedCount === 0 || patrolStart === null) return;
+    const endTime = completedTimes[completedCount-1] || Date.now();
+    const firstStopTime = completedTimes[0] || patrolStart;
+    // 予測精度向上のため、実際に移動した区間の直線距離合計（未補正）も記録しておく
+    let rawDistance = 0;
+    for(let k = 1; k < completedCount; k++) rawDistance += legDistances[k];
+    patrolHistory.unshift({
+      date: new Date(patrolStart).toISOString().slice(0,10),
+      mode: navMode,
+      start: patrolStart,
+      end: endTime,
+      duration: endTime - patrolStart,
+      visited: completedCount,
+      total: STOPS.length,
+      firstStopTime: firstStopTime,
+      rawDistance: rawDistance
+    });
+    if(patrolHistory.length > 30) patrolHistory = patrolHistory.slice(0, 30);
+  }
+
   function completeCurrentStop(){
     const now = Date.now();
     if(patrolStart === null){
@@ -532,14 +554,7 @@
     completedCount = completedCount + 1;
 
     if(completedCount >= STOPS.length){
-      patrolHistory.unshift({
-        date: new Date(patrolStart).toISOString().slice(0,10),
-        mode: navMode,
-        start: patrolStart,
-        end: now,
-        duration: now - patrolStart
-      });
-      if(patrolHistory.length > 30) patrolHistory = patrolHistory.slice(0, 30);
+      saveCurrentAsHistory();
     }
 
     persist();
@@ -552,6 +567,18 @@
     patrolStart = null;
     persist();
     render();
+  }
+
+  // 巡回を最後まで終えていなくても、ここまでの進捗を履歴として保存してリセットする。
+  function saveProgressAndReset(){
+    if(completedCount === 0){
+      alert('まだ完了した地点がありません。');
+      return;
+    }
+    if(confirm(`ここまでの進捗（${completedCount}/${STOPS.length}箇所）を巡回履歴として保存し、リセットします。よろしいですか？`)){
+      saveCurrentAsHistory();
+      resetProgress();
+    }
   }
 
   // 地図で選んだ選択地点・スタート地点からルートを再計算し、巡回構成として適用する。
@@ -680,6 +707,23 @@
     return `約${(m/1000).toFixed(1)}km`;
   }
 
+  // 過去の巡回履歴（同じ移動手段）から実測ペースを算出する。データがなければnull。
+  function getHistoricalSpeedMPerMs(mode){
+    const routeFactor = ROUTE_FACTOR[mode] || ROUTE_FACTOR.bike;
+    let totalDist = 0, totalElapsed = 0;
+    patrolHistory.forEach(rec => {
+      if(rec.mode !== mode) return;
+      if(!rec.rawDistance || !rec.firstStopTime) return;
+      const elapsed = rec.end - rec.firstStopTime;
+      if(elapsed > 0 && rec.rawDistance > 0){
+        totalDist += rec.rawDistance * routeFactor;
+        totalElapsed += elapsed;
+      }
+    });
+    if(totalElapsed > 0 && totalDist > 0) return totalDist / totalElapsed;
+    return null;
+  }
+
   // 各地点の完了予測時刻(ms)を計算。まだ巡回を開始していない場合は全てnull。
   // 実測データが2地点分以上たまった時点で、それ以降の予測は実際のペース
   // （移動＋立ち寄り時間を合算した実測ペース）に基づいて補正する。
@@ -689,19 +733,27 @@
     if(patrolStart === null) return preds;
 
     const routeFactor = ROUTE_FACTOR[navMode] || ROUTE_FACTOR.bike;
-    const defaultSpeedMPerMs = (SPEED_KMH[navMode] || SPEED_KMH.bike) * 1000 / 3600000;
+    const fixedDefaultSpeedMPerMs = (SPEED_KMH[navMode] || SPEED_KMH.bike) * 1000 / 3600000;
+    const historicalSpeedMPerMs = getHistoricalSpeedMPerMs(navMode);
     const dwellMs = STOP_DWELL_MINUTES * 60000;
 
-    let useActualPace = false;
-    let actualSpeedMPerMs = null;
+    // 予測に使うペースは優先順位で決める：
+    // ①今回の巡回の実測ペース → ②過去の巡回履歴の実測ペース → ③固定の想定速度
+    // ①②はどちらも実際にかかった時間（立ち寄り時間込み）から算出済みのため、legTimeに別途dwellを足さない。
+    // ③は移動のみを想定した速度のため、legTime計算時にdwellを別途加算する。
+    let speedMPerMs = fixedDefaultSpeedMPerMs;
+    let speedIncludesDwell = false;
+    if(historicalSpeedMPerMs){
+      speedMPerMs = historicalSpeedMPerMs;
+      speedIncludesDwell = true;
+    }
     if(completedCount >= 2){
       const elapsed = completedTimes[completedCount-1] - completedTimes[0];
       let dist = 0;
       for(let k = 1; k < completedCount; k++) dist += legDistances[k] * routeFactor;
       if(elapsed > 0 && dist > 0){
-        // 実測ペースには移動時間と立ち寄り時間の両方が含まれるため、そのまま将来の区間に適用する
-        actualSpeedMPerMs = dist / elapsed;
-        useActualPace = true;
+        speedMPerMs = dist / elapsed;
+        speedIncludesDwell = true;
       }
     }
 
@@ -712,20 +764,13 @@
         preds[i] = cumTime;
       } else {
         let legTime;
-        if(i === 0){
-          if(startPoint){
-            const distAdjusted = legDistances[0] * routeFactor;
-            legTime = useActualPace
-              ? (distAdjusted / actualSpeedMPerMs)
-              : (distAdjusted / defaultSpeedMPerMs + dwellMs);
-          } else {
-            legTime = dwellMs; // 出発地が未設定のため、確認の立ち寄り時間のみ加算
-          }
+        if(i === 0 && !startPoint){
+          legTime = dwellMs; // 出発地が未設定のため、確認の立ち寄り時間のみ加算
         } else {
           const distAdjusted = legDistances[i] * routeFactor;
-          legTime = useActualPace
-            ? (distAdjusted / actualSpeedMPerMs)
-            : (distAdjusted / defaultSpeedMPerMs + dwellMs);
+          legTime = speedIncludesDwell
+            ? (distAdjusted / speedMPerMs)
+            : (distAdjusted / speedMPerMs + dwellMs);
         }
         cumTime = cumTime + legTime;
         preds[i] = cumTime;
@@ -850,14 +895,21 @@
       historyEl.innerHTML = '<div class="history-empty">まだ実施記録がありません</div>';
     } else {
       historyEl.innerHTML = patrolHistory.map(rec => {
+        const total = rec.total || STOPS.length;
+        const visited = rec.visited || total;
+        const countText = visited >= total ? `全${total}箇所完了` : `${visited}/${total}箇所（途中）`;
         return `
           <div class="history-item">
             <span class="h-date">${rec.date}（${modeLabel(rec.mode)}）</span>
-            <span>${formatClock(rec.start)}〜${formatClock(rec.end)}　所要 ${formatElapsed(rec.duration)}</span>
+            <span>${formatClock(rec.start)}〜${formatClock(rec.end)}　所要 ${formatElapsed(rec.duration)}　${countText}</span>
           </div>`;
       }).join('');
     }
   }
+
+  document.getElementById('saveHistoryBtn').addEventListener('click', () => {
+    saveProgressAndReset();
+  });
 
   document.getElementById('resetBtn').addEventListener('click', () => {
     document.getElementById('modalOverlay').classList.add('show');
